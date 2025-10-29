@@ -1,67 +1,67 @@
 {
-    "php.validate.executablePath": "C:\\php\\php.exe",
-    "workbench.colorTheme": "Night Owl",
-    "workbench.iconTheme": "material-icon-theme",
-    "workbench.colorCustomizations": {
-        "terminal.background": "#131212",
-        "terminal.foreground": "#dddad6",
-        "terminal.ansiBlack": "#1D2021",
-        "terminal.ansiBrightBlack": "#665C54",
-        "terminal.ansiBrightBlue": "#0D6678",
-        "terminal.ansiBrightCyan": "#8BA59B",
-        "terminal.ansiBrightGreen": "#237e02",
-        "terminal.ansiBrightMagenta": "#8F4673",
-        "terminal.ansiBrightRed": "#FB543F",
-        "terminal.ansiBrightWhite": "#FDF4C1",
-        "terminal.ansiBrightYellow": "#FAC03B",
-        "terminal.ansiBlue": "#00a1f9",
-        "terminal.ansiCyan": "#8BA59B",
-        "terminal.ansiGreen": "#95C085",
-        "terminal.ansiMagenta": "#8F4673",
-        "terminal.ansiRed": "#FB543F",
-        "terminal.ansiWhite": "#A89984",
-        "terminal.ansiYellow": "#FAC03B",
+  "php.validate.executablePath": "C:\\php\\php.exe",
+  "workbench.colorTheme": "Default Dark Modern",
+  "workbench.iconTheme": "material-icon-theme",
+  "workbench.colorCustomizations": {
+    "terminal.background": "#131212",
+    "terminal.foreground": "#dddad6",
+    "terminal.ansiBlack": "#1D2021",
+    "terminal.ansiBrightBlack": "#665C54",
+    "terminal.ansiBrightBlue": "#0D6678",
+    "terminal.ansiBrightCyan": "#8BA59B",
+    "terminal.ansiBrightGreen": "#237e02",
+    "terminal.ansiBrightMagenta": "#8F4673",
+    "terminal.ansiBrightRed": "#FB543F",
+    "terminal.ansiBrightWhite": "#FDF4C1",
+    "terminal.ansiBrightYellow": "#FAC03B",
+    "terminal.ansiBlue": "#00a1f9",
+    "terminal.ansiCyan": "#8BA59B",
+    "terminal.ansiGreen": "#95C085",
+    "terminal.ansiMagenta": "#8F4673",
+    "terminal.ansiRed": "#FB543F",
+    "terminal.ansiWhite": "#A89984",
+    "terminal.ansiYellow": "#FAC03B",
 
-        "[Night Owl]": {
-            "activityBar.background": "#000C1D",
-            "activityBar.border": "#102a44",
-            "editorGroup.border": "#102a44",
-            "sideBar.background": "#001122",
-            "sideBar.border": "#102a44",
-            "sideBar.foreground": "#8BADC1"
-        },
-        "[Night Owl (No Italics)]": {
-            "activityBar.background": "#000C1D",
-            "activityBar.border": "#102a44",
-            "editorGroup.border": "#102a44",
-            "sideBar.background": "#001122",
-            "sideBar.border": "#102a44",
-            "sideBar.foreground": "#8BADC1"
-        }
+    "[Night Owl]": {
+      "activityBar.background": "#000C1D",
+      "activityBar.border": "#102a44",
+      "editorGroup.border": "#102a44",
+      "sideBar.background": "#001122",
+      "sideBar.border": "#102a44",
+      "sideBar.foreground": "#8BADC1"
     },
-    "editor.detectIndentation": false,
-    "editor.tabSize": 2,
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "editor.formatOnSave": true,
-    "editor.codeActionsOnSave": {
-        "source.fixAll.eslint": "explicit",
-        "source.organizeImports": "explicit"
-    },
-    "workbench.editor.limit.value": 6,
-    "workbench.editor.limit.enabled": true,
-
-    "files.autoSave": "onFocusChange",
-
-    "typescript.updateImportsOnFileMove.enabled": "always",
-    "javascript.updateImportsOnFileMove.enabled": "always",
-
-    "indentRainbow.colors": [
-        "rgba(255,255,64,0.2)",
-        "rgba(127,255,127,0.2)",
-        "rgba(255,127,255,0.2)",
-        "rgba(79,236,236,0.2)"
-    ],
-    "[php]": {
-        "editor.defaultFormatter": "bmewburn.vscode-intelephense-client"
+    "[Night Owl (No Italics)]": {
+      "activityBar.background": "#000C1D",
+      "activityBar.border": "#102a44",
+      "editorGroup.border": "#102a44",
+      "sideBar.background": "#001122",
+      "sideBar.border": "#102a44",
+      "sideBar.foreground": "#8BADC1"
     }
+  },
+  "editor.detectIndentation": false,
+  "editor.tabSize": 2,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit",
+    "source.organizeImports": "explicit"
+  },
+  "workbench.editor.limit.value": 6,
+  "workbench.editor.limit.enabled": true,
+
+  "files.autoSave": "onFocusChange",
+
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  "javascript.updateImportsOnFileMove.enabled": "always",
+
+  "indentRainbow.colors": [
+    "rgba(255,255,64,0.2)",
+    "rgba(127,255,127,0.2)",
+    "rgba(255,127,255,0.2)",
+    "rgba(79,236,236,0.2)"
+  ],
+  "[php]": {
+    "editor.defaultFormatter": "bmewburn.vscode-intelephense-client"
+  }
 }
