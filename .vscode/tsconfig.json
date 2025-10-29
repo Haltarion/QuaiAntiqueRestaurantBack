@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "target": "ES6", // Version de ECMAScript 6
+    "outDir": "../scripts/dossierJS" //Nom du dossier de distanciation pour les fichiers JavaScript
+  },
+  "include": [
+    "**.ts" // Type de fichier à compiler
+  ]
+}

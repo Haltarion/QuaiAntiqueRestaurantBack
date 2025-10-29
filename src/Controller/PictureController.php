@@ -12,149 +12,184 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\{JsonResponse, Request, Response, File\UploadedFile};
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
 
 #[Route('/api/picture', name: 'app_api_picture_')]
 class PictureController extends AbstractController
 {
-    public function __construct(
-        private EntityManagerInterface $manager,
-        private PictureRepository $repository,
-        private SerializerInterface $serializer,
-        private UrlGeneratorInterface $urlGenerator,
-    ) {}
+  public function __construct(
+    private EntityManagerInterface $manager,
+    private PictureRepository $repository,
+    private SerializerInterface $serializer,
+    private UrlGeneratorInterface $urlGenerator,
+  ) {}
 
-    #[Route(methods: 'POST')]
-    public function new(Request $request): JsonResponse
-    {
-        $title = $request->request->get('title');
-        /** @var UploadedFile|null $file */
-        $file = $request->files->get('file');
+  #[Route(methods: 'POST')]
+  /** @OA\Post(
+   *     path="/api/picture",
+   *     summary="Ajouter une image",
+   *     @OA\RequestBody(
+   *         required=true,
+   *         description="Données de l'image à ajouter",
+   *         @OA\JsonContent(
+   *             type="object",
+   *             @OA\Property(property="title", type="string", example="Titre de l'image"),
+   *             @OA\Property(property="slug", type="string", example="Url de l'image")
+   *         )
+   *     ),
+   *     @OA\Response(
+   *         response=201,
+   *         description="Image ajouté avec succès",
+   *         @OA\JsonContent(
+   *             type="object",
+   *             @OA\Property(property="id", type="integer", example=1),
+   *             @OA\Property(property="title", type="string", example="Titre de l'image"),
+   *             @OA\Property(property="slug", type="string", example="Url de l'image"),
+   *             @OA\Property(property="createdAt", type="string", format="date-time")
+   *         )
+   *     )
+   * )
+   */
+  public function new(Request $request): JsonResponse
+  {
+    $picture = $this->serializer->deserialize($request->getContent(), Picture::class, 'json');
+    $picture->setCreatedAt(new DateTimeImmutable());
 
-        if (!$title || !$file) {
-            return new JsonResponse(['error' => 'Tous les champs sont requis'], Response::HTTP_BAD_REQUEST);
-        }
+    $this->manager->persist($picture);
+    $this->manager->flush();
 
-        $restaurant = $this->manager->getRepository(Restaurant::class)->find(1);
-        if (!$restaurant) {
-            return new JsonResponse(['error' => 'Restaurant introuvable'], Response::HTTP_BAD_REQUEST);
-        }
+    $responseData = $this->serializer->serialize($picture, 'json');
+    $location = $this->urlGenerator->generate(
+      'app_api_picture_show',
+      ['id' => $picture->getId()],
+      UrlGeneratorInterface::ABSOLUTE_URL,
+    );
 
-        $uploadsDir = $this->getParameter('kernel.project_dir') . '/public/uploads';
-        if (!is_dir($uploadsDir)) {
-            mkdir($uploadsDir, 0777, true);
-        }
+    return new JsonResponse($responseData, Response::HTTP_CREATED, ["Location" => $location], true);
+  }
 
-        $filename = uniqid() . '-' . $file->getClientOriginalName();
-        $file->move($uploadsDir, $filename);
+  /** @OA\Get(
+   *     path="/api/picture/{id}",
+   *     summary="Afficher une image par ID",
+   *     @OA\Parameter(
+   *         name="id",
+   *         in="path",
+   *         required=true,
+   *         description="ID de l'image à afficher",
+   *         @OA\Schema(type="integer")
+   *     ),
+   *     @OA\Response(
+   *         response=200,
+   *         description="Image trouvée avec succès",
+   *         @OA\JsonContent(
+   *             type="object",
+   *             @OA\Property(property="id", type="integer", example=1),
+   *             @OA\Property(property="title", type="string", example="Titre de l'image"),
+   *             @OA\Property(property="slug", type="string", example="Url de l'image"),
+   *             @OA\Property(property="createdAt", type="string", format="date-time")
+   *         )
+   *     ),
+   *     @OA\Response(
+   *         response=404,
+   *         description="Image non trouvée"
+   *     )
+   * )
+   */
+  #[Route('/{id}', name: 'show', methods: 'GET')]
+  public function show(int $id): JsonResponse
+  {
+    $picture = $this->repository->findOneBy(['id' => $id]);
+    if ($picture) {
+      $responseData = $this->serializer->serialize($picture, 'json');
 
-        $picture = new Picture();
-        $picture->setTitle($title);
-        $picture->setSlug('uploads/' . $filename);
-        $picture->setRestaurant($restaurant);
-        $picture->setCreatedAt(new DateTimeImmutable());
-
-        $this->manager->persist($picture);
-        $this->manager->flush();
-
-        $location = $this->urlGenerator->generate(
-            'app_api_picture_show',
-            ['id' => $picture->getId()],
-            UrlGeneratorInterface::ABSOLUTE_URL
-        );
-
-        return new JsonResponse(
-            [
-                'id' => $picture->getId(),
-                'title' => $picture->getTitle(),
-                'slug' => $picture->getSlug(),
-                'restaurant' => 1,
-                'createdAt' => $picture->getCreatedAt()->format('c')
-            ],
-            Response::HTTP_CREATED,
-            ["Location" => $location]
-        );
+      return new JsonResponse($responseData, Response::HTTP_OK, [], true);
     }
 
-    #[Route('/{id}', name: 'show', methods: 'GET')]
-    public function show(int $id): JsonResponse
-    {
-        $picture = $this->repository->find($id);
-        if (!$picture) {
-            return new JsonResponse(null, Response::HTTP_NOT_FOUND);
-        }
+    return new JsonResponse(null, Response::HTTP_NOT_FOUND);
+  }
 
-        return new JsonResponse(
-            [
-                'id' => $picture->getId(),
-                'title' => $picture->getTitle(),
-                'slug' => $picture->getSlug(),
-                'restaurant' => 1,
-                'createdAt' => $picture->getCreatedAt()->format('c')
-            ]
-        );
+  /** @OA\Put(
+   *     path="/api/picture/{id}",
+   *     summary="Modifier une image par ID",
+   *     @OA\Parameter(
+   *         name="id",
+   *         in="path",
+   *         required=true,
+   *         description="ID de l'image à modifier",
+   *         @OA\Schema(type="integer")
+   *     ),
+   *     @OA\RequestBody(
+   *         required=true,
+   *         description="Nouvelles données du restaurant à mettre à jour",
+   *         @OA\JsonContent(
+   *             type="object",
+   *             @OA\Property(property="title", type="string", example="Nouveau nom de l'image"),
+   *             @OA\Property(property="slug", type="string", example="Nouvelle url de l'image")
+   *         )
+   *     ),
+   *     @OA\Response(
+   *         response=204,
+   *         description="Image modifiée avec succès"
+   *     ),
+   *     @OA\Response(
+   *         response=404,
+   *         description="Image non trouvée"
+   *     )
+   * )
+   */
+  #[Route('/{id}', name: 'edit', methods: 'PUT')]
+  public function edit(int $id, Request $request): JsonResponse
+  {
+    $picture = $this->repository->findOneBy(['id' => $id]);
+    if ($picture) {
+      $picutre = $this->serializer->deserialize(
+        $request->getContent(),
+        Picture::class,
+        'json',
+        [AbstractNormalizer::OBJECT_TO_POPULATE => $picture]
+      );
+      $picture->setUpdatedAt(new DateTimeImmutable());
+
+      $this->manager->flush();
+
+      return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 
-    #[Route('/{id}', name: 'edit', methods: 'PUT')]
-    public function edit(int $id, Request $request): JsonResponse
-    {
-        $picture = $this->repository->find($id);
-        if (!$picture) {
-            return new JsonResponse(null, Response::HTTP_NOT_FOUND);
-        }
+    return new JsonResponse(null, Response::HTTP_NOT_FOUND);
+  }
 
-        $title = $request->request->get('title');
-        /** @var UploadedFile|null $file */
-        $file = $request->files->get('file');
+  /** @OA\Delete(
+   *     path="/api/picture/{id}",
+   *     summary="Supprimer une image par ID",
+   *     @OA\Parameter(
+   *         name="id",
+   *         in="path",
+   *         required=true,
+   *         description="ID de l'image à supprimer",
+   *         @OA\Schema(type="integer")
+   *     ),
+   *     @OA\Response(
+   *         response=204,
+   *         description="Image supprimée avec succès"
+   *     ),
+   *     @OA\Response(
+   *         response=404,
+   *         description="Image non trouvé"
+   *     )
+   * )
+   */
+  #[Route('/{id}', name: 'delete', methods: 'DELETE')]
+  public function delete(int $id): JsonResponse
+  {
+    $picture = $this->repository->findOneBy(['id' => $id]);
+    if ($picture) {
+      $this->manager->remove($picture);
+      $this->manager->flush();
 
-        if ($title) {
-            $picture->setTitle($title);
-        }
-
-        if ($file) {
-            $uploadsDir = $this->getParameter('kernel.project_dir') . '/public/uploads';
-            $filename = uniqid() . '-' . $file->getClientOriginalName();
-            $file->move($uploadsDir, $filename);
-            $picture->setSlug('uploads/' . $filename);
-        }
-
-        $picture->setUpdatedAt(new DateTimeImmutable());
-
-        $this->manager->flush();
-
-        return new JsonResponse(null, Response::HTTP_NO_CONTENT);
+      return new JsonResponse(null, Response::HTTP_NOT_FOUND);
     }
 
-    #[Route('/{id}', name: 'delete', methods: 'DELETE')]
-    public function delete(int $id): JsonResponse
-    {
-        $picture = $this->repository->find($id);
-        if (!$picture) {
-            return new JsonResponse(null, Response::HTTP_NOT_FOUND);
-        }
-
-        $this->manager->remove($picture);
-        $this->manager->flush();
-
-        return new JsonResponse(null, Response::HTTP_NO_CONTENT);
-    }
-
-    #[Route('', name: 'list', methods: 'GET')]
-    public function list(): JsonResponse
-    {
-        $pictures = $this->repository->findAll();
-        $data = [];
-
-        foreach ($pictures as $picture) {
-            $data[] = [
-                'id' => $picture->getId(),
-                'title' => $picture->getTitle(),
-                'slug' => $picture->getSlug(),
-                'restaurant' => 1,
-                'createdAt' => $picture->getCreatedAt()->format('c')
-            ];
-        }
-
-        return new JsonResponse($data);
-    }
+    return new JsonResponse(null, Response::HTTP_NO_CONTENT);
+  }
 }
